@@ -19,10 +19,10 @@ get_arg()
     eval "echo \$$1"
 }
 
-# read byte from pipe and convert to hex
-read_hex()
+# check contains a byte 81
+is_packet()
 {
-    dd bs=1 count=1 2>/dev/null | hexdump -e '"%02x"'
+    printf "$1" | grep -q $(printf '\x81')
 }
 
 # read N bytes from pipe and convert to unsigned decimal 1-byte units (space seporated)
@@ -77,14 +77,10 @@ ws_connect()
 # main loop
 ws_server()
 {
-    while true
+    while read -n 1 flag
     do
-        # read first byte
-        flag=$(read_hex)
-        # exit if received 0 bytes
-        [ "${#flag}" != "0" ] || break
         # each packet starts at byte 81
-        [ "$flag" = "81" ] || continue
+        is_packet "$flag" || continue
         # read next 5 bytes:
         # 1 -> length
         # 2-5 -> encoding bytes
