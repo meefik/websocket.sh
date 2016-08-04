@@ -15,23 +15,29 @@
     }
     ws.onclose = function() { console.log('Connection closed.'); }
 
-    function send(e) {
-        e.preventDefault();
-        var code = e.charCode || e.keyCode;
-        var char = String.fromCharCode(code);
-        ws.send(btoa(char));
+    function send(str) {
+        ws.send(btoa(str));
     }
     function keypress(e) {
         //console.log('keypress', e.keyCode, e.charCode);
-        send(e);
+        e.preventDefault();
+        var code = e.charCode || e.keyCode;
+        send(String.fromCharCode(code));
     }
     function keydown(e) {
         //console.log('keydown', e.keyCode, e.charCode);
         switch(e.keyCode) {
-            case 8: // backspace
-            case 9: // tab
-            case 13: // enter
-                send(e);
+            case 8: // Backspace
+                e.preventDefault();
+                send(String.fromCharCode(8));
+                break;
+            case 9: // Tab
+                e.preventDefault();
+                send(String.fromCharCode(9));
+                break;
+            case 13: // Enter
+                e.preventDefault();
+                send(String.fromCharCode(10));
                 break;
             case 33: // PageUp
             case 34: // PageDown
