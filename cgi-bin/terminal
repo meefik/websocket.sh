@@ -1,9 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "Content-type: text/html"
 echo ""
 
-ncat -l -p 5000 -e ../websocket.sh </dev/null >/dev/null &
+let PORT=${HTTP_HOST##*:}+1
+ncat -l -p ${PORT} -e ../websocket.sh </dev/null >/dev/null &
 cat ../index.html
 
 echo ""

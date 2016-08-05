@@ -1,7 +1,7 @@
 <html>
 <head>
 <script language="javascript">
-    var port = 5000;
+    var port = parseInt(location.port) + 1;
     var ws = new WebSocket('ws://' + location.hostname + ':' + port);
     ws.onmessage = function(msg) {
         // convert base64 to string
