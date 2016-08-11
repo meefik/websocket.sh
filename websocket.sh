@@ -1,6 +1,6 @@
 #!/bin/bash
 
-[ -n "$WS_SHELL" ] || WS_SHELL="bash -i"
+[ -n "$WS_SHELL" ] || WS_SHELL="bash"
 
 # read pipe as hex without separating and convert to char
 hex_to_bin()
@@ -100,6 +100,5 @@ ws_server()
 }
 
 # start
-ws_connect && 
+ws_connect &&
 ws_server
-

@@ -6,9 +6,15 @@ The cross platform [WebSocket](https://tools.ietf.org/html/rfc6455) implementati
 
 ### Bash shell as a web terminal
 
-Run web server httpd in websocket.sh directory:
+Run web server httpd in websocket.sh directory. For [JQuery Terminal Emulator](http://terminal.jcubic.pl):
 ```sh
-httpd -p 8080
+cd jquery.terminal
+WS_SHELL="bash" httpd -p 8080
+```
+For [Terminal.js](http://terminal.js.org):
+```sh
+cd terminal.js
+WS_SHELL="bash -i" httpd -p 8080
 ```
 Open the terminal in browser: [http://localhost:8080/cgi-bin/terminal](http://localhost:8080/cgi-bin/terminal)
 
@@ -16,7 +22,7 @@ Open the terminal in browser: [http://localhost:8080/cgi-bin/terminal](http://lo
 
 Run websocket.sh:
 ```sh
-WS_SHELL="bash -i" ncat -l -p 5000 -e websocket.sh
+WS_SHELL="sh" ncat -l -p 5000 -e websocket.sh
 ```
 Use from browser:
 ```js
