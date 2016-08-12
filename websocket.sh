@@ -2,15 +2,18 @@
 
 [ -n "$WS_SHELL" ] || WS_SHELL="bash"
 
-# read pipe as hex without separating and convert to char
-hex_to_bin()
+# read pipe as hex without separating and add \x for each byte
+split_hex()
 {
+    local hex code
     while read -n 2 code
     do
-        if [ -n "$code" ]; then
-            printf "\x$code"
+        if [ -n "$code" ]
+        then
+             hex="$hex\x$code"
         fi
     done
+    echo -n "$hex"
 }
 
 # get arguments, first argument - 2
@@ -32,31 +35,38 @@ read_dec()
 }
 
 # read pipe and convert to websocket frame
-# see RFC6455 "Base Framing Protocol"
+# see RFC6455 "Base Framing Protocol" https://tools.ietf.org/html/rfc6455
 ws_send()
 {
+    local data length
     while true
     do
-        # ws limit 125 bytes (93 bytes for base64)
-        # base64 length for n bytes: 4 * n / 3
-        data=$(dd bs=93 count=1 2>/dev/null | base64)
+        # Text frame: 0x81 [length] [data]
+        # Length: 00-7D -> 0xXX; 0000-FFFF -> 0xXXXX
+        # base64 max length: 7D -> 93; FFFF -> 48513
+        data=$(dd bs=48513 count=1 2>/dev/null | base64)
+        length=${#data}
         # exit if received 0 bytes
-        [ "${#data}" != "0" ] || break
-        # 0x8 -> the final frame
-        # 0x1 -> textual frame
-        printf "\x81\x$(printf '%02x' ${#data})$data"
+        [ "$length" -gt 0 ] || break
+        if [ "$length" -gt 125 ]
+        then
+            printf "\x81\x7E$(printf '%04x' ${length} | split_hex)$data"
+        else
+            printf "\x81\x$(printf '%02x' ${length})$data"
+        fi
     done
 }
 
 # initialize websocket connection
 ws_connect()
 {
+    local line outkey
     while read line
     do
         if printf %s "$line" | grep -q $'^\r$'; then
-            outkey=$(printf %s "$sec_websocket_key" | dos2unix)
+            outkey=$(printf %s "$sec_websocket_key" | dos2unix -u)
             outkey="${outkey}258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
-            outkey=$(printf %s "$outkey" | sha1sum | cut -d ' ' -f 1 | hex_to_bin | base64)
+            outkey=$(printf %s "$outkey" | sha1sum | cut -d ' ' -f 1 | printf $(split_hex) | base64)
             #outkey=$(printf %s "$outkey" |  openssl dgst -binary -sha1 | openssl base64)
             printf "HTTP/1.1 101 Switching Protocols\r\n"
             printf "Upgrade: websocket\r\n"
@@ -77,6 +87,7 @@ ws_connect()
 # main loop
 ws_server()
 {
+    local flag header length byte i
     while read -n 1 flag
     do
         # each packet starts at byte 81
