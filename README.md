@@ -37,7 +37,7 @@ var ws = new WebSocket('ws://' + location.hostname + ':' + port);
 ws.onmessage = function(msg) {
     // convert base64 to string
     var data = atob(msg.data);
-    // decoding utf-8 chars
+    // decode utf-8 chars
     data = decodeURIComponent(escape(data));
     console.log('Received data: ', data);
 }
@@ -46,6 +46,9 @@ ws.onclose = function() {
 }
 // send command: ls /
 var data = 'ls /';
-ws.send(btoa(data));
+// encode utf-8 chars
+data = unescape(encodeURIComponent(data));
+// convert string to base64
+data = btoa(data);
+ws.send(data);
 ```
-
