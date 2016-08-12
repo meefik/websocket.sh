@@ -1,13 +1,36 @@
 <!doctype html>
 <html>
-    <head>
-        <title>xterm.js</title>
-        <link rel="stylesheet" href="/src/xterm.css" />
-        <script src="/src/xterm.js" ></script>
-        <script src="/addons/attach/attach.js" ></script>
-    </head>
-    <body>
-        <div id="terminal-container"></div>
-        <script src="/main.js" defer ></script>
-    </body>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>xterm.js</title>
+    <link rel="stylesheet" href="/src/xterm.css" />
+    <script src="/src/xterm.js"></script>
+    <script src="/addons/attach/attach.js"></script>
+    <script src="/addons/fit/fit.js"></script>
+    <style type="text/css">
+        #terminal-container {
+            width: 780px;
+            height: auto;
+            margin: 0 auto;
+            padding: 2px;
+        }
+
+        #terminal-container .terminal {
+            background-color: #111;
+            color: #fafafa;
+            padding: 2px;
+        }
+
+        #terminal-container .terminal:focus .terminal-cursor {
+            background-color: #fafafa;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="terminal-container"></div>
+    <script src="/main.js" defer></script>
+</body>
+
 </html>
