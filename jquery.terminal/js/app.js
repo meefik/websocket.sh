@@ -5,7 +5,7 @@ $(document).ready(function() {
 
     function send(command) {
         // string to base64
-        var data = btoa(command + '\n');
+        var data = btoa(unescape(encodeURIComponent(command + '\n')));
         ws.send(data);
     }
 

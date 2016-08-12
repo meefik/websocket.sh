@@ -87,6 +87,7 @@ ws_server()
         header=$(read_dec 5)
         # get packet length
         let length=$(get_arg 2 $header)-128
+        [ "$length" -gt 0 -a "$length" -le 125 ] || continue
         # read packet
         let i=0
         for byte in $(read_dec $length)

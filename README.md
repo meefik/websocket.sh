@@ -16,6 +16,12 @@ For [Terminal.js](http://terminal.js.org):
 cd terminal.js
 WS_SHELL="bash -i" httpd -p 8080
 ```
+For [xterm.js](https://github.com/sourcelair/xterm.js):
+```sh
+cd xterm.js
+telnetd -p 5023 -l /bin/bash
+WS_SHELL="telnet 127.0.0.1 5023" httpd -p 8080
+```
 Open the terminal in browser: [http://localhost:8080/cgi-bin/terminal](http://localhost:8080/cgi-bin/terminal)
 
 ### Custom usage

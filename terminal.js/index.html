@@ -31,18 +31,16 @@
 		var terminal = new Terminal(container.dataset);
 		var domInput = terminal.dom(container);
 		domInput.on('data', function(chunk) {
-			console.log(chunk.toString());
-			ws.send(btoa(chunk.toString()));
+			var data = unescape(encodeURIComponent(chunk.toString()));
+			ws.send(btoa(data));
 		});
 
 		ws.onmessage = function(msg) {
 			// преобразовать base64 в строку
 			var data = atob(msg.data);
 			// добавить недостающие символы перевода строки
-			data = data.replace(/\n|\r/g, '\r\n');
-			// правильное отображение utf-8
-			data = decodeURIComponent(escape(data));
-			terminal.write(data);
+			//data = data.replace(/\n|\r/g, '\r\n');
+			terminal.write(decodeURIComponent(escape(data)));
 		}
 	</script>
 </body>
