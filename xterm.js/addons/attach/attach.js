@@ -64,10 +64,12 @@
     var failCounter = 0;
     term._flushBuffer = function () {
       try {
-          term.write(decodeURIComponent(term._attachSocketBuffer));
+          if (term._attachSocketBuffer) {
+            term.write(decodeURIComponent(term._attachSocketBuffer));
+          }
       } catch(e) {
           setTimeout(term._flushBuffer, 10);
-          if (failCounter++ < 100) return;
+          if (failCounter++ < 5) return;
       }
       failCounter = 0;
       // term.write(term._attachSocketBuffer);

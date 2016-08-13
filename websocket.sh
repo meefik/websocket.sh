@@ -1,6 +1,9 @@
 #!/bin/bash
+# websocket.sh
+# (C) 2016 Anton Skshidlevsky <meefik@gmail.com>, MIT
+# The cross platform WebSocket implementation for SH.
 
-[ -n "$WS_SHELL" ] || WS_SHELL="bash"
+[ -n "$WS_SHELL" ] || WS_SHELL="sh"
 
 # read pipe as hex without separating and add \x for each byte
 split_hex()
@@ -25,7 +28,7 @@ get_arg()
 # check contains a byte 81
 is_packet()
 {
-    printf "$1" | grep -q $(printf '\x81')
+    echo -n "$1" | grep -q $(printf '\x81')
 }
 
 # read N bytes from pipe and convert to unsigned decimal 1-byte units (space seporated)
