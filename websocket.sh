@@ -22,7 +22,7 @@ split_hex()
 # get arguments, first argument - 2
 get_arg()
 {
-    eval "echo \$$1"
+    eval "echo -n \$$1"
 }
 
 # check contains a byte 81
@@ -66,10 +66,10 @@ ws_connect()
     local line outkey
     while read line
     do
-        if printf %s "$line" | grep -q $'^\r$'; then
-            outkey=$(printf %s "$sec_websocket_key" | dos2unix -u)
+        if printf "%s" "$line" | grep -q $'^\r$'; then
+            outkey=$(printf "%s" "$sec_websocket_key" | tr '\r' '\n')
             outkey="${outkey}258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
-            outkey=$(printf %s "$outkey" | sha1sum | cut -d ' ' -f 1 | printf $(split_hex) | base64)
+            outkey=$(printf "%s" "$outkey" | sha1sum | cut -d ' ' -f 1 | printf $(split_hex) | base64)
             #outkey=$(printf %s "$outkey" |  openssl dgst -binary -sha1 | openssl base64)
             printf "HTTP/1.1 101 Switching Protocols\r\n"
             printf "Upgrade: websocket\r\n"
