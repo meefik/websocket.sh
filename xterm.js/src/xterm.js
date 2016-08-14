@@ -219,7 +219,7 @@
       }
 
       return true;
-    }
+    };
 
     /**
      * Finalizes the composition, resuming regular input actions. This is called when a composition
@@ -275,7 +275,7 @@
           }
         }, 0);
       }
-    }
+    };
 
     /**
      * Apply any changes made to the textarea after the current event chain is allowed to complete.
@@ -296,13 +296,16 @@
           }
         }
       }, 0);
-    }
+    };
 
     /**
      * Positions the composition view on top of the cursor and the textarea just below it (so the
      * IME helper dialog is positioned correctly).
      */
     CompositionHelper.prototype.updateCompositionElements = function() {
+      if (!this.isComposing) {
+        return;
+      }
       var cursor = this.terminal.element.querySelector('.terminal-cursor');
       if (cursor) {
         this.compositionView.style.left = cursor.offsetLeft + 'px';
@@ -317,10 +320,132 @@
      * @private
      */
     CompositionHelper.prototype.clearTextareaPosition = function() {
-      this.textarea.style.left = undefined;
-      this.textarea.style.top = undefined;
+      this.textarea.style.left = '';
+      this.textarea.style.top = '';
+    };
+
+    /**
+     * Represents the viewport of a terminal, the visible area within the larger buffer of output.
+     * Logic for the virtual scroll bar is included in this object.
+     * @param {Terminal} terminal The Terminal object.
+     * @param {HTMLElement} viewportElement The DOM element acting as the viewport
+     * @param {HTMLElement} charMeasureElement A DOM element used to measure the character size of
+     *   the terminal.
+     */
+    function Viewport(terminal, viewportElement, scrollArea, charMeasureElement) {
+      this.terminal = terminal;
+      this.viewportElement = viewportElement;
+      this.scrollArea = scrollArea;
+      this.charMeasureElement = charMeasureElement;
+      this.currentRowHeight = 0;
+      this.lastRecordedBufferLength = 0;
+      this.lastRecordedViewportHeight = 0;
+
+      this.terminal.on('scroll', this.syncScrollArea.bind(this));
+      this.terminal.on('resize', this.syncScrollArea.bind(this));
+      this.viewportElement.addEventListener('scroll', this.onScroll.bind(this));
+
+      this.syncScrollArea();
     }
 
+    /**
+     * Refreshes row height, setting line-height, viewport height and scroll area height if
+     * necessary.
+     * @param {number|undefined} charSize A character size measurement bounding rect object, if it
+     *   doesn't exist it will be created.
+     */
+    Viewport.prototype.refresh = function(charSize) {
+      var size = charSize || this.charMeasureElement.getBoundingClientRect();
+      if (size.height > 0) {
+        if (size.height !== this.currentRowHeight) {
+          this.currentRowHeight = size.height;
+          this.viewportElement.style.lineHeight = size.height + 'px';
+          this.terminal.rowContainer.style.lineHeight = size.height + 'px';
+        }
+        if (this.lastRecordedViewportHeight !== this.terminal.rows) {
+          this.lastRecordedViewportHeight = this.terminal.rows;
+          this.viewportElement.style.height = size.height * this.terminal.rows + 'px';
+        }
+        this.scrollArea.style.height = (size.height * this.lastRecordedBufferLength) + 'px';
+      }
+    };
+
+    /**
+     * Updates dimensions and synchronizes the scroll area if necessary.
+     */
+    Viewport.prototype.syncScrollArea = function() {
+      if (this.isApplicationMode) {
+        // Fix scroll bar in application mode
+        this.lastRecordedBufferLength = this.terminal.rows;
+        this.refresh();
+        return;
+      }
+
+      if (this.lastRecordedBufferLength !== this.terminal.lines.length) {
+        // If buffer height changed
+        this.lastRecordedBufferLength = this.terminal.lines.length;
+        this.refresh();
+      } else if (this.lastRecordedViewportHeight !== this.terminal.rows) {
+        // If viewport height changed
+        this.refresh();
+      } else {
+        // If size has changed, refresh viewport
+        var size = this.charMeasureElement.getBoundingClientRect();
+        if (size.height !== this.currentRowHeight) {
+          this.refresh(size);
+        }
+      }
+
+      // Sync scrollTop
+      var scrollTop = this.terminal.ydisp * this.currentRowHeight;
+      if (this.viewportElement.scrollTop !== scrollTop) {
+        this.viewportElement.scrollTop = scrollTop;
+      }
+    };
+
+    /**
+     * Sets the application mode of the viewport.
+     * @param {boolean} isApplicationMode Sets whether the terminal is in application mode. true
+     * for application mode (DECKPAM) and false for normal mode (DECKPNM).
+     */
+    Viewport.prototype.setApplicationMode = function(isApplicationMode) {
+      this.isApplicationMode = isApplicationMode;
+      this.syncScrollArea();
+    };
+
+    /**
+     * Handles scroll events on the viewport, calculating the new viewport and requesting the
+     * terminal to scroll to it.
+     * @param {Event} ev The scroll event.
+     */
+    Viewport.prototype.onScroll = function(ev) {
+      var newRow = Math.round(this.viewportElement.scrollTop / this.currentRowHeight);
+      var diff = newRow - this.terminal.ydisp;
+      this.terminal.scrollDisp(diff, true);
+    };
+
+    /**
+     * Handles mouse wheel events by adjusting the viewport's scrollTop and delegating the actual
+     * scrolling to `onScroll`, this event needs to be attached manually by the consumer of
+     * `Viewport`.
+     * @param {WheelEvent} ev The mouse wheel event.
+     */
+    Viewport.prototype.onWheel = function(ev) {
+      if (ev.deltaY === 0) {
+        // Do nothing if it's not a vertical scroll event
+        return;
+      }
+      // Fallback to WheelEvent.DOM_DELTA_PIXEL
+      var multiplier = 1;
+      if (ev.deltaMode === WheelEvent.DOM_DELTA_LINE) {
+        multiplier = this.currentRowHeight;
+      } else if (ev.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
+        multiplier = this.currentRowHeight * this.terminal.rows;
+      }
+      this.viewportElement.scrollTop += ev.deltaY * multiplier;
+      // Prevent the page from scrolling when the terminal scrolls
+      ev.preventDefault();
+    };
 
     /**
      * States
@@ -785,7 +910,6 @@
       return row;
     };
 
-
     /**
      * Opens the terminal within an element.
      *
@@ -839,7 +963,16 @@
       this.element.classList.add('terminal');
       this.element.classList.add('xterm');
       this.element.classList.add('xterm-theme-' + this.theme);
+
+      this.element.style.height
       this.element.setAttribute('tabindex', 0);
+
+      this.viewportElement = document.createElement('div');
+      this.viewportElement.classList.add('xterm-viewport');
+      this.element.appendChild(this.viewportElement);
+      this.viewportScrollArea = document.createElement('div');
+      this.viewportScrollArea.classList.add('xterm-scroll-area');
+      this.viewportElement.appendChild(this.viewportScrollArea);
 
       /*
       * Create the container that will hold the lines of the terminal and then
@@ -877,11 +1010,17 @@
       this.compositionHelper = new CompositionHelper(this.textarea, this.compositionView, this);
       this.helperContainer.appendChild(this.compositionView);
 
+      this.charMeasureElement = document.createElement('div');
+      this.charMeasureElement.classList.add('xterm-char-measure-element');
+      this.charMeasureElement.innerHTML = 'W';
+      this.helperContainer.appendChild(this.charMeasureElement);
+
       for (; i < this.rows; i++) {
         this.insertRow();
       }
       this.parent.appendChild(this.element);
 
+      this.viewport = new Viewport(this, this.viewportElement, this.viewportScrollArea, this.charMeasureElement);
 
       // Draw the screen.
       this.refresh(0, this.rows - 1);
@@ -947,11 +1086,10 @@
      */
     Terminal.prototype.bindMouse = function() {
       var el = this.element, self = this, pressed = 32;
-      var wheelEvent = ('onmousewheel' in this.context) ? 'mousewheel' : 'DOMMouseScroll';
 
-      // mouseup, mousedown, mousewheel
+      // mouseup, mousedown, wheel
       // left click: ^[[M 3<^[[M#3<
-      // mousewheel up: ^[[M`3>
+      // wheel up: ^[[M`3>
       function sendButton(ev) {
         var button
           , pos;
@@ -974,7 +1112,7 @@
             // button, just in case.
             pressed = 32;
             break;
-          case wheelEvent:
+          case 'wheel':
             // nothing. don't
             // interfere with
             // `pressed`.
@@ -1135,7 +1273,7 @@
               ? 64
               : 65;
             break;
-          case 'mousewheel':
+          case 'wheel':
             button = ev.wheelDeltaY > 0
               ? 64
               : 65;
@@ -1205,9 +1343,7 @@
         return {
           x: x,
           y: y,
-          type: (ev.overrideType || ev.type) === wheelEvent
-            ? 'mousewheel'
-            : (ev.overrideType || ev.type)
+          type: 'wheel'
         };
       }
 
@@ -1248,7 +1384,7 @@
       //  on(self.document, 'mousemove', sendMove);
       //}
 
-      on(el, wheelEvent, function(ev) {
+      on(el, 'wheel', function(ev) {
         if (!self.mouseEvents) return;
         if (self.x10Mouse
             || self.vt300Mouse
@@ -1257,16 +1393,12 @@
         return self.cancel(ev);
       });
 
-      // allow mousewheel scrolling in
+      // allow wheel scrolling in
       // the shell for example
-      on(el, wheelEvent, function(ev) {
+      on(el, 'wheel', function(ev) {
         if (self.mouseEvents) return;
         if (self.applicationKeypad) return;
-        if (ev.type === 'DOMMouseScroll') {
-          self.scrollDisp(ev.detail < 0 ? -1 : 1);
-        } else {
-          self.scrollDisp(ev.wheelDeltaY > 0 ? -1 : 1);
-        }
+        self.viewport.onWheel(ev);
         return self.cancel(ev);
       });
     };
@@ -1572,19 +1704,28 @@
       // this.maxRange();
       this.updateRange(this.scrollTop);
       this.updateRange(this.scrollBottom);
+
+      this.emit('scroll', this.ydisp);
     };
 
     /**
      * Scroll the display of the terminal
      * @param {number} disp The number of lines to scroll down (negatives scroll up).
+     * @param {boolean} suppressScrollEvent Don't emit the scroll event as scrollDisp. This is used
+     * to avoid unwanted events being handled by the veiwport when the event was triggered from the
+     * viewport originally.
      */
-    Terminal.prototype.scrollDisp = function(disp) {
+    Terminal.prototype.scrollDisp = function(disp, suppressScrollEvent) {
       this.ydisp += disp;
 
       if (this.ydisp > this.ybase) {
         this.ydisp = this.ybase;
       } else if (this.ydisp < 0) {
         this.ydisp = 0;
+      }
+
+      if (!suppressScrollEvent) {
+        this.emit('scroll', this.ydisp);
       }
 
       this.refresh(0, this.rows - 1);
@@ -1602,6 +1743,7 @@
 
       if (this.ybase !== this.ydisp) {
         this.ydisp = this.ybase;
+        this.emit('scroll', this.ydisp);
         this.maxRange();
       }
 
@@ -1928,17 +2070,19 @@
                 this.tabSet();
                 break;
 
-              // ESC = Application Keypad (DECPAM).
+              // ESC = Application Keypad (DECKPAM).
               case '=':
                 this.log('Serial port requested application keypad.');
                 this.applicationKeypad = true;
+                this.viewport.setApplicationMode(true);
                 this.state = normal;
                 break;
 
-              // ESC > Normal Keypad (DECPNM).
+              // ESC > Normal Keypad (DECKPNM).
               case '>':
                 this.log('Switching back to normal keypad.');
                 this.applicationKeypad = false;
+                this.viewport.setApplicationMode(false);
                 this.state = normal;
                 break;
 
@@ -4182,6 +4326,7 @@
           case 66:
             this.log('Serial port requested application keypad.');
             this.applicationKeypad = true;
+            this.viewport.setApplicationMode(true);
             break;
           case 9: // X10 Mouse
             // no release, no motion, no wheel, no modifiers.
@@ -4380,6 +4525,7 @@
             break;
           case 66:
             this.log('Switching back to normal keypad.');
+            this.viewport.setApplicationMode(false);
             this.applicationKeypad = false;
             break;
           case 9: // X10 Mouse
@@ -5249,6 +5395,7 @@
 
     Terminal.EventEmitter = EventEmitter;
     Terminal.CompositionHelper = CompositionHelper;
+    Terminal.Viewport = Viewport;
     Terminal.inherits = inherits;
 
     /**

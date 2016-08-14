@@ -50,26 +50,26 @@
     term.socket = socket;
 
     function unescape(str) {
-        return str.replace(/%([0-9A-F]{2})/g, function(match, p1) {
-            return String.fromCharCode('0x' + p1);
-        });
+      return str.replace(/%([0-9A-F]{2})/g, function(match, p1) {
+        return String.fromCharCode('0x' + p1);
+      });
     }
 
     function escape(str) {
-        return Array.prototype.map.call(str, function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join('');
+      return Array.prototype.map.call(str, function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join('');
     }
 
     var failCounter = 0;
     term._flushBuffer = function () {
       try {
-          if (term._attachSocketBuffer) {
-            term.write(decodeURIComponent(term._attachSocketBuffer));
-          }
+        if (term._attachSocketBuffer) {
+          term.write(decodeURIComponent(term._attachSocketBuffer));
+        }
       } catch(e) {
-          setTimeout(term._flushBuffer, 10);
-          if (failCounter++ < 5) return;
+        setTimeout(term._flushBuffer, 10);
+        if (failCounter++ < 5) return;
       }
       failCounter = 0;
       // term.write(term._attachSocketBuffer);
@@ -92,7 +92,11 @@
       if (buffered) {
         term._pushToBuffer(data);
       } else {
-        term.write(data);
+        try {
+          term.write(decodeURIComponent(data));
+        } catch(e) {
+          term.write(data);
+        }
       }
     };
 

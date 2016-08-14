@@ -2,6 +2,7 @@
 # websocket.sh
 # (C) 2016 Anton Skshidlevsky <meefik@gmail.com>, MIT
 # The cross platform WebSocket implementation for SH.
+# https://github.com/meefik/websocket.sh
 
 [ -n "$WS_SHELL" ] || WS_SHELL="sh"
 

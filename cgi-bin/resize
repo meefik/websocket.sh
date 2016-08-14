@@ -1,0 +1,22 @@
+#!/bin/bash
+
+echo "Content-type: text/html"
+echo ""
+
+for param in ${QUERY_STRING//&/ }
+do
+    key="${param%=*}"
+    value="${param#*=}"
+    if [ "$key" = "dev" -o "$key" = "cols" -o "$key" = "rows" ]
+    then
+        eval $key="$value"
+    fi
+done
+
+if [ "$dev" -a "$cols" -a "$rows" ]
+then
+    stty -F $dev rows $rows columns $cols
+fi
+
+echo ""
+echo ""
