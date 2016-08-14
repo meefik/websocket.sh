@@ -61,11 +61,18 @@
       }).join('');
     }
 
+    function decodeBuffer(data) {
+      return decodeURIComponent(data).replace(/([^\r])\n/g,
+        function(item, saved) {
+          return saved + '\r\n';
+        });
+    }
+
     var failCounter = 0;
     term._flushBuffer = function () {
       try {
         if (term._attachSocketBuffer) {
-          term.write(decodeURIComponent(term._attachSocketBuffer));
+          term.write(decodeBuffer(term._attachSocketBuffer));
         }
       } catch(e) {
         setTimeout(term._flushBuffer, 10);
@@ -93,7 +100,7 @@
         term._pushToBuffer(data);
       } else {
         try {
-          term.write(decodeURIComponent(data));
+          term.write(decodeBuffer(data));
         } catch(e) {
           term.write(data);
         }
