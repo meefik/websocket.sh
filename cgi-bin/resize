@@ -7,10 +7,7 @@ for param in ${QUERY_STRING//&/ }
 do
     key="${param%=*}"
     value="${param#*=}"
-    if [ "$key" = "dev" -o "$key" = "cols" -o "$key" = "rows" ]
-    then
-        eval $key="$value"
-    fi
+    eval ${key//[^a-zA-Z0-9_]/}=\"$value\"
 done
 
 if [ "$dev" -a "$cols" -a "$rows" ]

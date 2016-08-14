@@ -9,7 +9,7 @@ The cross platform [WebSocket](https://tools.ietf.org/html/rfc6455) implementati
 Run web server httpd in websocket.sh directory. For [JQuery Terminal Emulator](http://terminal.jcubic.pl):
 ```sh
 cd jquery.terminal
-WS_SHELL="bash" httpd -p 8080
+WS_SHELL="sh" httpd -p 8080
 ```
 For [Terminal.js](http://terminal.js.org):
 ```sh

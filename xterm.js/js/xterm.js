@@ -2427,13 +2427,15 @@
               // CSI s
               //   Save cursor (ANSI.SYS).
               case 's':
-                this.saveCursor(this.params);
+                // FIXME: https://github.com/sourcelair/xterm.js/issues/229
+                // this.saveCursor(this.params);
                 break;
 
               // CSI u
               //   Restore cursor (ANSI.SYS).
               case 'u':
-                this.restoreCursor(this.params);
+                // FIXME: https://github.com/sourcelair/xterm.js/issues/229
+                // this.restoreCursor(this.params);
                 break;
 
               /**
