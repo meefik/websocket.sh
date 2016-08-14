@@ -1,3 +1,5 @@
+// Terminal.js
+// http://terminal.js.org
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Terminal = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 module.exports = require("./lib/terminal.js");
 
@@ -616,7 +618,7 @@ var esc = {
 	/**
 	* ESC D<br>
 	* Index (IND is 0x84)
-	* Moves cursor down one line in same column. 
+	* Moves cursor down one line in same column.
 	* If cursor is at bottom margin, screen performs a scroll-up.
 	*/
 	"D": function(cmd, chunk) {
@@ -674,11 +676,11 @@ var esc = {
 	* ESC L<br>
 	* Partial Line Up (superscript) (PLU)
 	*/
- 
+
 	/**
 	* ESC M<br>
 	* Reverse Index (RI is 0x8d)
-	* Move the active position to the same horizontal position on the preceding line. 
+	* Move the active position to the same horizontal position on the preceding line.
 	* If the active position is at the top margin, a scroll down is performed
 	*/
 	"M": function(cmd, chunk) {
@@ -904,7 +906,7 @@ var esc = {
 
 	/**
 	* ESC ^<br>
-	* Privacy Message (password verification), terminaed by ST 
+	* Privacy Message (password verification), terminaed by ST
 	* (PM is 0x9e) (PM)
 	*/
 	"^": function(cmd, chunk) {
@@ -1207,7 +1209,7 @@ var osc = {
 
 	// TODO: Manipulate Selection Data
 	52: function() {
-		
+
 	},
 	104: function(cmd, arg) {
 		this.emit("colorreset", arg);
@@ -1288,15 +1290,15 @@ var sgr = {
 	},
 
 	51: function(cmd) { // Frame:box
-		
+
 	},
 
 	52: function(cmd) { // Frame:circle
-		
+
 	},
 
 	53: function(cmd) { // Overlined
-		
+
 	},
 
 	90: "97", 91: "97", 92: "97", 93: "97", 94: "97", 95: "97", 96: "97",
@@ -1677,7 +1679,7 @@ AnsiOutput.prototype.toString = function() {
 		var line = this.state.getLine(i);
 		lines += "\n" + this._renderLine(line, c.y === i ? c.x : null);
 	}
-	
+
 	return lines.substr(1) + "\x1b[0m";
 };
 
