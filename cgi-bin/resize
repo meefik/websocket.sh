@@ -10,9 +10,13 @@ do
     eval ${key//[^a-zA-Z0-9_]/}=\"$value\"
 done
 
-if [ "$dev" -a "$cols" -a "$rows" ]
+if [ "$dev" -a "$rows" -a "$cols"  ]
 then
-    stty -F $dev rows $rows columns $cols
+    if [ -n "$refresh" ]
+    then
+        stty -F $dev rows $(($rows-1)) cols $(($cols-1))
+    fi
+    stty -F $dev rows $rows cols $cols
 fi
 
 echo ""

@@ -38,7 +38,14 @@ function createTerminal(terminalContainer, optionElements) {
     };
 
     term.on('resize', function(e) {
-        if (pty) resizePty(pty, e.rows, e.cols);
+        resizePty(pty, e.rows, e.cols);
+    });
+
+    // Hot key for resize: Ctrl + Alt + r
+    window.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.altKey && e.keyCode == 82) {
+            resizePty(pty, term.rows, term.cols, true);
+        }
     });
 
     window.onresize = function() {
@@ -46,8 +53,11 @@ function createTerminal(terminalContainer, optionElements) {
     };
 }
 
-function resizePty(pty, rows, cols) {
+function resizePty(pty, rows, cols, refresh) {
+    if (!pty) return;
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'resize?dev=' + pty + '&rows=' + rows + '&cols=' + cols);
+    var uri = 'resize?dev=' + pty + '&rows=' + rows + '&cols=' + cols;
+    if (refresh) uri += "&refresh=1";
+    xhr.open('GET', uri);
     xhr.send();
 }
