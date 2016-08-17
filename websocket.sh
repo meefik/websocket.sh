@@ -5,6 +5,7 @@
 # https://github.com/meefik/websocket.sh
 
 [ -n "$WS_SHELL" ] || WS_SHELL="sh"
+export LANG="C"
 
 # read pipe as hex without separating and add \x for each byte
 split_hex()
