@@ -9,18 +9,18 @@ The cross platform [WebSocket](https://tools.ietf.org/html/rfc6455) implementati
 Run web server httpd in websocket.sh directory. For [JQuery Terminal Emulator](http://terminal.jcubic.pl):
 ```sh
 cd jquery.terminal
-WS_SHELL="sh" httpd -p 8080
+WS_SHELL="sh" busybox httpd -p 8080
 ```
 For [Terminal.js](http://terminal.js.org):
 ```sh
 cd terminal.js
-WS_SHELL="bash -i" httpd -p 8080
+WS_SHELL="bash -i" busybox httpd -p 8080
 ```
 For [xterm.js](https://github.com/sourcelair/xterm.js):
 ```sh
 cd xterm.js
-telnetd -p 5023 -l /bin/bash -f /etc/issue
-WS_SHELL="telnet 127.0.0.1 5023" httpd -p 8080
+telnetd -p 5023 -l /bin/sh -f /etc/issue
+WS_SHELL="telnet 127.0.0.1 5023" busybox httpd -p 8080
 ```
 Open the terminal in browser: [http://localhost:8080/cgi-bin/terminal](http://localhost:8080/cgi-bin/terminal)
 
@@ -28,7 +28,7 @@ Open the terminal in browser: [http://localhost:8080/cgi-bin/terminal](http://lo
 
 Run websocket.sh:
 ```sh
-WS_SHELL="sh" ncat -l -p 5000 -e websocket.sh
+WS_SHELL="sh" busybox nc -l -p 5000 -e websocket.sh
 ```
 Use from browser:
 ```js
@@ -51,4 +51,16 @@ data = unescape(encodeURIComponent(data));
 // convert string to base64
 data = btoa(data);
 ws.send(data);
+```
+
+### Multiple socket connections
+
+You can use busybox inetd for multiple connections to single port for websocket.sh:
+```sh
+export WS_SHELL="/path/to/script.sh"
+busybox inetd -e -f /path/to/inetd.conf
+```
+```
+# /path/to/inetd.conf
+5000	stream	tcp	nowait	root	/path/to/websocket.sh
 ```
