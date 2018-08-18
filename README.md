@@ -1,8 +1,8 @@
 # websocket.sh
 
-Copyright (C) 2016 Anton Skshidlevsky (meefik), MIT
+Copyright (C) 2016-2018 Anton Skshidlevsky (meefik), MIT
 
-The cross platform [WebSocket](https://tools.ietf.org/html/rfc6455) implementation for SH. It works on busybox and ash for embedded systems (requires installed busybox applets).
+The cross platform [WebSocket](https://tools.ietf.org/html/rfc6455) implementation for UNIX shell. It works on busybox and ash for embedded systems (requires installing busybox applets).
 
 ### Bash shell as a web terminal
 
@@ -11,15 +11,10 @@ Run web server httpd in websocket.sh directory. For [JQuery Terminal Emulator](h
 cd jquery.terminal
 WS_SHELL="sh" httpd -p 8080
 ```
-For [Terminal.js](http://terminal.js.org):
-```sh
-cd terminal.js
-WS_SHELL="bash -i" httpd -p 8080
-```
 For [xterm.js](https://github.com/sourcelair/xterm.js):
 ```sh
 cd xterm.js
-telnetd -p 5023 -l /bin/sh -f /etc/issue
+telnetd -p 5023 -l "/bin/sh" -f ./issue
 WS_SHELL="telnet 127.0.0.1 5023" httpd -p 8080
 ```
 Open the terminal in browser: [http://localhost:8080/cgi-bin/terminal](http://localhost:8080/cgi-bin/terminal)
@@ -28,29 +23,24 @@ Open the terminal in browser: [http://localhost:8080/cgi-bin/terminal](http://lo
 
 Run websocket.sh:
 ```sh
-WS_SHELL="sh" nc -l -p 5000 -e websocket.sh
+WS_SHELL="cat" nc -l -p 5000 -e websocket.sh
 ```
 Use from browser:
 ```js
 var port = 5000;
 var ws = new WebSocket('ws://' + location.hostname + ':' + port);
-ws.onmessage = function(msg) {
-    // convert base64 to string
-    var data = atob(msg.data);
-    // decode utf-8 chars
-    data = decodeURIComponent(escape(data));
-    console.log('Received data: ', data);
+ws.onmessage = function(ev) {
+  var textDecoder = new TextDecoder();
+  var fileReader = new FileReader();
+  fileReader.addEventListener('load', function () {
+    var str = textDecoder.decode(fileReader.result);
+    console.log('Received data: ', str);
+  });
+  fileReader.readAsArrayBuffer(ev.data);
 }
-ws.onclose = function() {
-    console.log('Connection closed.');
+ws.onopen = function() {
+  ws.send('hello');
 }
-// send command: ls /
-var data = 'ls /';
-// encode utf-8 chars
-data = unescape(encodeURIComponent(data));
-// convert string to base64
-data = btoa(data);
-ws.send(data);
 ```
 
 ### Multiple socket connections
