@@ -49,7 +49,7 @@ ws_send()
     # Binary frame: 0x82 [length] [data]
     # Max length: 00-7D -> 125; 0000-FFFF -> 65535
     data=$(dd bs=65535 count=1 2>/dev/null)
-    length=${#data}
+    length=$(echo -n "$data" | wc -c)
     # exit if received 0 bytes
     [ "$length" -gt 0 ] || break
     if [ "$length" -gt 125 ]
