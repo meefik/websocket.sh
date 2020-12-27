@@ -33,7 +33,7 @@ is_packet()
   echo -n "$1" | grep -q -e $(printf '\x81') -e $(printf '\x82')
 }
 
-# read N bytes from pipe and convert to unsigned decimal 1-byte units (space seporated)
+# read N bytes from pipe and convert to unsigned decimal 1-byte units (space separated)
 read_dec()
 {
   dd bs=$1 count=1 2>/dev/null | od -A n -t u1 -w$1
@@ -111,7 +111,7 @@ ws_server()
       # decoding byte: byte ^ encoding_bytes[i % 4]
       let byte=byte^$(get_arg $(($i % 4 + 3)) $header)
       printf "\x$(printf '%02x' $byte)"
-      let i=i+1
+      i=$((i + 1))
     done
   done | $WS_SHELL 2>&1 | ws_send
 }
