@@ -1,6 +1,6 @@
 # websocket.sh
 
-Copyright (C) 2016-2018 Anton Skshidlevsky (meefik), MIT
+Copyright (C) 2016-2020 Anton Skshidlevsky (meefik), MIT
 
 The cross platform [WebSocket](https://tools.ietf.org/html/rfc6455) implementation for UNIX shell. It works on busybox and ash for embedded systems (requires installing busybox applets).
 
