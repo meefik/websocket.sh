@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # websocket.sh
 # (C) 2016-2018 Anton Skshidlevsky <meefik@gmail.com>, MIT
 # The cross platform WebSocket implementation for SH.
