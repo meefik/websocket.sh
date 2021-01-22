@@ -3,9 +3,8 @@
 echo "Content-type: text/html"
 echo ""
 
-cd ..
 let PORT=${HTTP_HOST##*:}+1
-nc -l -p ${PORT} -e websocket.sh </dev/null >/dev/null &
+nc -l -p ${PORT} -e ../websocket.sh </dev/null >/dev/null &
 cat ${SCRIPT_FILENAME%*/cgi-bin/terminal}/index.html
 
 echo ""
