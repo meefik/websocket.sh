@@ -11,7 +11,3 @@ else
   WS_PORT=$(( PORT+1 ))
 fi
 nc -l -p ${WS_PORT} -e ../websocket.sh </dev/null >/dev/null &
-cat ${SCRIPT_FILENAME%*/cgi-bin/terminal}/index.html
-
-echo ""
-echo ""
