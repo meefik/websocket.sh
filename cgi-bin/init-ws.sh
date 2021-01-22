@@ -7,5 +7,7 @@ else
   WS_PORT=$(( PORT+1 ))
 fi
 nc -l -p ${WS_PORT} -e ../websocket.sh </dev/null >/dev/null &
-echo "Content-Type: text/html"
+echo "Content-Type: application/javascript"
 echo ""
+echo "var wsPort = ${WS_PORT};"
+echo "console.log('WS port: ' + wsPort);"

@@ -17,7 +17,7 @@ cd xterm.js
 telnetd -p 5023 -l "/bin/sh" -f ./issue
 WS_SHELL="telnet 127.0.0.1 5023" httpd -p 8080
 ```
-Open the terminal in browser: [http://localhost:8080/cgi-bin/terminal](http://localhost:8080/cgi-bin/terminal)
+Open the terminal in browser: [http://localhost:8080/](http://localhost:8080/)
 
 ### Custom usage
 
@@ -27,8 +27,8 @@ WS_SHELL="cat" nc -l -p 12010 -e websocket.sh
 ```
 Use from browser:
 ```js
-var port = 12010;
-var ws = new WebSocket('ws://' + location.hostname + ':' + port);
+var wsPort = 12010;
+var ws = new WebSocket('ws://' + location.hostname + ':' + wsPort);
 ws.onmessage = function(ev) {
   var textDecoder = new TextDecoder();
   var fileReader = new FileReader();
@@ -50,7 +50,8 @@ You can use busybox inetd for multiple connections to single port for websocket.
 export WS_SHELL="/path/to/script.sh"
 inetd -e -f /path/to/inetd.conf
 ```
+
+The `/path/to/inetd.conf` may look like:
 ```
-# /path/to/inetd.conf
 12010	stream	tcp	nowait	root	/path/to/websocket.sh
 ```

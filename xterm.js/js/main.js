@@ -26,8 +26,7 @@ window.onload = function () {
   var pty;
 
   var protocol = (location.protocol === 'https:') ? 'wss://' : 'ws://';
-  var port = parseInt(location.port) + 1;
-  var socketURL = protocol + location.hostname + ((port) ? (':' + port) : '');
+  var socketURL = protocol + location.hostname + ':' + wsPort;
   var socket = new WebSocket(socketURL);
 
   Terminal.applyAddon(fit);
