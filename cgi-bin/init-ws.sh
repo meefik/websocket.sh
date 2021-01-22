@@ -1,8 +1,4 @@
 #!/bin/sh
-
-echo "Content-type: text/html"
-echo ""
-
 let PORT=${HTTP_HOST##*:}
 if [ $PORT -eq 0 ]
 then
@@ -11,3 +7,5 @@ else
   WS_PORT=$(( PORT+1 ))
 fi
 nc -l -p ${WS_PORT} -e ../websocket.sh </dev/null >/dev/null &
+echo "Content-Type: text/html"
+echo ""
