@@ -2,11 +2,15 @@
 
 Copyright (C) 2016-2020 Anton Skshidlevsky (meefik), MIT
 
-The cross platform [WebSocket](https://tools.ietf.org/html/rfc6455) implementation for UNIX shell. It works on busybox and ash for embedded systems (requires installing busybox applets).
+The cross platform [WebSocket](https://tools.ietf.org/html/rfc6455) implementation for UNIX shell.
+It works on busybox and ash for embedded systems (requires installing busybox applets).
+
+![demo](./demo.gif)
 
 ### Bash shell as a web terminal
 
-Run web server httpd in websocket.sh directory. For [JQuery Terminal Emulator](http://terminal.jcubic.pl):
+Run web server httpd in websocket.sh directory.
+For [JQuery Terminal Emulator](https://terminal.jcubic.pl/):
 ```sh
 cd jquery.terminal
 WS_SHELL="sh" httpd -p 8080
