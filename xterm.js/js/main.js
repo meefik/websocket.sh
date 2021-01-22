@@ -3,7 +3,7 @@ window.onload = function () {
   function resizePty(pty, rows, cols, refresh) {
     if (!pty) return;
     var xhr = new XMLHttpRequest();
-    var uri = 'resize?dev=' + pty + '&rows=' + rows + '&cols=' + cols;
+    var uri = './cgi-bin/resize?dev=' + pty + '&rows=' + rows + '&cols=' + cols;
     if (refresh) uri += "&refresh=1";
     xhr.open('GET', uri);
     xhr.send();
