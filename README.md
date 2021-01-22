@@ -23,11 +23,11 @@ Open the terminal in browser: [http://localhost:8080/cgi-bin/terminal](http://lo
 
 Run websocket.sh:
 ```sh
-WS_SHELL="cat" nc -l -p 5000 -e websocket.sh
+WS_SHELL="cat" nc -l -p 12010 -e websocket.sh
 ```
 Use from browser:
 ```js
-var port = 5000;
+var port = 12010;
 var ws = new WebSocket('ws://' + location.hostname + ':' + port);
 ws.onmessage = function(ev) {
   var textDecoder = new TextDecoder();
@@ -52,5 +52,5 @@ inetd -e -f /path/to/inetd.conf
 ```
 ```
 # /path/to/inetd.conf
-5000	stream	tcp	nowait	root	/path/to/websocket.sh
+12010	stream	tcp	nowait	root	/path/to/websocket.sh
 ```
