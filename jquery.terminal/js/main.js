@@ -13,8 +13,7 @@ function textToBlob(str) {
 }
 
 $(document).ready(function () {
-  var port = parseInt(location.port) + 1;
-  var ws = new WebSocket('ws://' + location.hostname + ':' + port);
+  var ws = new WebSocket('ws://' + location.hostname + ':' + wsPort);
 
   var terminal = $('#terminal').terminal(function (command, terminal) {
     ws.send(textToBlob(command + '\n'));

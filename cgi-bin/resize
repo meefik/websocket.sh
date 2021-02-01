@@ -1,8 +1,4 @@
 #!/bin/sh
-
-echo "Content-type: text/html"
-echo ""
-
 for param in ${QUERY_STRING//&/ }
 do
     key="${param%=*}"
@@ -18,6 +14,5 @@ then
     fi
     stty -F $dev rows $rows cols $cols
 fi
-
-echo ""
+echo "Content-Type: text/html"
 echo ""
