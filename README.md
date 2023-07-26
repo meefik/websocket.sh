@@ -7,7 +7,7 @@ It works on busybox and ash for embedded systems (requires installing busybox ap
 
 ![demo](./demo.gif)
 
-[На русском / In Russian](https://meefik.github.io/2016/08/04/websocket-sh/)
+[See the developer's blog](https://meefik.github.io/2016/08/04/websocket-sh/)
 
 ### Bash shell as a web terminal
 
