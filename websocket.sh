@@ -34,9 +34,14 @@ is_packet()
 }
 
 # read N bytes from pipe and convert to unsigned decimal 1-byte units (space separated)
+# eg:  "1 2 3 4 5 6 7 8 9 10" and $1 = 5  -> 40 50 51 52 53
 read_dec()
 {
-  dd bs=$1 count=1 2>/dev/null | od -A n -t u1 -w$1
+  local c
+  dd bs=$1 count=1 2>/dev/null | while IFS= read -n 1 c; do
+     # leading ' causes $c to be interpreted as the numeric value in the underlying codeset.
+     printf "%d " "'$c"
+  done
 }
 
 # read pipe and convert to websocket frame
