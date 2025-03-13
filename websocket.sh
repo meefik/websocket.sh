@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/busybox sh
 # websocket.sh
-# (C) 2016-2018 Anton Skshidlevsky <meefik@gmail.com>, MIT
+# (C) 2016-2025 Anton Skshidlevsky <meefik@gmail.com>, MIT
 # The cross platform WebSocket implementation for SH.
 # https://github.com/meefik/websocket.sh
 
@@ -34,13 +34,14 @@ is_packet()
 }
 
 # read N bytes from pipe and convert to unsigned decimal 1-byte units (space separated)
-# eg:  "1 2 3 4 5 6 7 8 9 10" and $1 = 5  -> 40 50 51 52 53
+# eg: "1 2 3 4 5 6 7 8 9 10" and $1 = 5 -> 40 50 51 52 53
 read_dec()
 {
-  local c
-  dd bs=$1 count=1 2>/dev/null | while IFS= read -n 1 c; do
-     # leading ' causes $c to be interpreted as the numeric value in the underlying codeset.
-     printf "%d " "'$c"
+  local byte
+  dd bs=$1 count=1 2>/dev/null | while IFS= read -n 1 byte
+  do
+     # leading ' causes $byte to be interpreted as the numeric value in the underlying codeset
+     printf "%d " "'$byte"
   done
 }
 

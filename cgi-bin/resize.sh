@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/busybox sh
+
 for param in ${QUERY_STRING//&/ }
 do
     key="${param%=*}"
@@ -14,5 +15,6 @@ then
     fi
     stty -F $dev rows $rows cols $cols
 fi
-echo "Content-Type: text/html"
+
+echo "Content-Type: text/plain"
 echo ""

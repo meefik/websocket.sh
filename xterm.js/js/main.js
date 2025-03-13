@@ -1,9 +1,8 @@
 window.onload = function () {
-
   function resizePty(pty, rows, cols, refresh) {
     if (!pty) return;
     var xhr = new XMLHttpRequest();
-    var uri = './cgi-bin/resize?dev=' + pty + '&rows=' + rows + '&cols=' + cols;
+    var uri = './cgi-bin/resize.sh?dev=' + pty + '&rows=' + rows + '&cols=' + cols;
     if (refresh) uri += "&refresh=1";
     xhr.open('GET', uri);
     xhr.send();
@@ -25,15 +24,16 @@ window.onload = function () {
 
   var pty;
 
+  var port = window.WS_PORT || (location.port + 1);
   var protocol = (location.protocol === 'https:') ? 'wss://' : 'ws://';
-  var socketURL = protocol + location.hostname + ':' + wsPort;
+  var socketURL = protocol + location.hostname + ':' + port;
   var socket = new WebSocket(socketURL);
 
-  Terminal.applyAddon(fit);
-
-  var xterm = new Terminal({ cursorBlink: true });
-  xterm.open(document.getElementById('terminal'));
-  xterm.fit();
+  var terminal = new Terminal({ cursorBlink: true });
+  var fitAddon = new FitAddon.FitAddon();
+  terminal.loadAddon(fitAddon);
+  terminal.open(document.getElementById('terminal'));
+  fitAddon.fit();
 
   socket.addEventListener('message', function (ev) {
     blobToText(ev.data, function (str) {
@@ -41,30 +41,30 @@ window.onload = function () {
         var match = str.match(/\/dev\/pts\/\d+/);
         if (match) {
           pty = match[0];
-          resizePty(pty, xterm.rows, xterm.cols);
+          resizePty(pty, terminal.rows, terminal.cols);
         }
       }
       str = str.replace(/([^\r])\n|\r$/g, '\r\n');
-      xterm.write(str);
+      terminal.write(str);
     });
   });
 
-  xterm.on('data', function (data) {
+  terminal.onData(function (data) {
     socket.send(textToBlob(data));
   });
 
-  xterm.on('resize', function (e) {
+  terminal.onResize(function (e) {
     resizePty(pty, e.rows, e.cols);
   });
 
   window.addEventListener('resize', function () {
-    xterm.fit();
+    fitAddon.fit();
   });
 
-  // Hot key for resize: Ctrl + Alt + r
+  // Hot key for resize: Meta/Cmd + r
   window.addEventListener('keydown', function (e) {
-    if (e.ctrlKey && e.altKey && e.keyCode == 82) {
-      resizePty(pty, xterm.rows, xterm.cols, true);
+    if (e.metaKey && e.key == 'r') {
+      resizePty(pty, terminal.rows, terminal.cols, true);
     }
   });
 };
